@@ -25,7 +25,8 @@ jobs:
           });
           
           const context = github.context;
-          
+          console.log(context);
+
           const pullRequest = await octokit.pulls.get({
             owner: context.repo.owner,
             repo: context.repo.repo,
