@@ -23,6 +23,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           script: |
+            const act = context.payload.action;
             const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({
               auth: 'token ${{ env.GITHUB_TOKEN }}'
@@ -33,8 +34,6 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
-
-            console.log(context);
 
             const labels = pullRequest.data.labels.map(label => label.name);
 
@@ -49,26 +48,37 @@ jobs:
               version = latestTagResponse.data[0].name.substr(1);
             }
 
-            if (labels.includes('major')) {
+            if (labels.includes('major')  && act == 'opened') {
               const major = version.split('.')[0];
               version = `${parseInt(major) + 1}.0.0`;
             } else 
-            if (labels.includes('enhancement')) {
+            if (labels.includes('enhancement') && act == 'opened') {
               const minor = version.split('.')[1];
               version = `${version.split('.')[0]}.${parseInt(minor) + 1}.0`;
             } else 
-            if (labels.includes('bug')) {
+            if (labels.includes('bug') && act == 'synchronize') {
               const patch = version.split('.')[2];
               version = `${version.split('.')[0]}.${version.split('.')[1]}.${parseInt(patch) + 1}`;
             }
 
             const tag = 'v' + version;
 
-            octokit.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/' + tag,
-              sha: pullRequest.data.head.sha
-            });
+            if( act == 'closed') {
+              octokit.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tag,
+                target_commitish: pullRequest.data.head.sha,
+                name: 'Release ' + tag,
+                body: 'This is the release for version ' + tag
+              });
+            }else{
+              octokit.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'refs/tags/' + tag,
+                sha: pullRequest.data.head.sha
+              });
+            }
 
             console.log(`Tag ${tag} created.`);
