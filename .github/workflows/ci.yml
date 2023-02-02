@@ -10,51 +10,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Get Pull Request Information
-      id: pr-info
-      uses: actions/github-script@v6.4.0
-      env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
-      with:
-        script: |
-          const octokit = require('@octokit/rest')({
-            auth: 'token ${{ env.GITHUB_TOKEN }}'
-          });
-          
-          const context = github.context;
-          console.log(context);
+      - name: Get Pull Request Information
+        id: pr-info
+        uses: actions/github-script@v6.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          script: |
+            const octokit = require('@octokit/rest')({
+              auth: 'token ${{ env.GITHUB_TOKEN }}'
+            });
 
-          const pullRequest = await octokit.pulls.get({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number
-          });
-          
-          const labels = pullRequest.data.labels.map(label => label.name);
-          
-          let version = '0.0.0';
-          
-          if (labels.includes('Major')) {
-            const major = version.split('.')[0];
-            version = `${parseInt(major) + 1}.0.0`;
-          } else if (labels.includes('enhancement')) {
-            const minor = version.split('.')[1];
-            version = `${version.split('.')[0]}.${parseInt(minor) + 1}.0`;
-          } else if (labels.includes('bug')) {
-            const patch = version.split('.')[2];
-            version = `${version.split('.')[0]}.${version.split('.')[1]}.${parseInt(patch) + 1}`;
-          }
-          
-          const tag = 'v' + version;
-          
-          octokit.git.createRef({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: 'refs/tags/' + tag,
-            sha: pullRequest.data.head.sha
-          });
-          
-          console.log(`Tag ${tag} created.`);
+            const pullRequest = await octokit.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const labels = pullRequest.data.labels.map(label => label.name);
+
+            let version = '0.0.0';
+
+            if (labels.includes('Major')) {
+              const major = version.split('.')[0];
+              version = `${parseInt(major) + 1}.0.0`;
+            } else if (labels.includes('enhancement')) {
+              const minor = version.split('.')[1];
+              version = `${version.split('.')[0]}.${parseInt(minor) + 1}.0`;
+            } else if (labels.includes('bug')) {
+              const patch = version.split('.')[2];
+              version = `${version.split('.')[0]}.${version.split('.')[1]}.${parseInt(patch) + 1}`;
+            }
+
+            const tag = 'v' + version;
+
+            octokit.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/' + tag,
+              sha: pullRequest.data.head.sha
+            });
+
+            console.log(`Tag ${tag} created.`);
