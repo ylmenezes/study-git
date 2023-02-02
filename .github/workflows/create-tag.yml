@@ -2,7 +2,7 @@ name: Create Tag
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, closed]
     branches: [master]
 
 jobs:
@@ -23,6 +23,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           script: |
+            const act = context.payload.action;
+
             const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({
               auth: 'token ${{ env.GITHUB_TOKEN }}'
@@ -36,36 +38,63 @@ jobs:
 
             const labels = pullRequest.data.labels.map(label => label.name);
 
+
             const latestTagResponse = await octokit.repos.listTags({
               owner: context.repo.owner,
               repo: context.repo.repo
             });
 
             let version = '0.0.0';
-            if (latestTagResponse.data.length > 0) {
-              version = latestTagResponse.data[0].name.substr(1);
+
+            if( act === 'closed') {
+
+              const pullRequestCommit = pullRequest.data.head.sha;
+              for (const tag of latestTagResponse.data) {
+                if (tag.commit.sha === pullRequestCommit) {
+                  version = tag.name.substr(1);
+                  break;
+                }
+              }
+
+              const tag = 'v' + version;
+
+              octokit.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tag,
+                target_commitish: pullRequest.data.head.sha,
+                name: 'Release ' + tag,
+                body: 'This is the release for version ' + tag
+              });
+
+              console.log(`Release ${tag} created.`);
+            }else{
+
+              if (latestTagResponse.data.length > 0) {
+                version = latestTagResponse.data[0].name.substr(1);
+              }
+
+              if (labels.includes('major')  && act === 'opened') {
+                const major = version.split('.')[0];
+                version = `${parseInt(major) + 1}.0.0`;
+              } else 
+              if (labels.includes('enhancement') && act === 'opened') {
+                const minor = version.split('.')[1];
+                version = `${version.split('.')[0]}.${parseInt(minor) + 1}.0`;
+              } else 
+              if (labels.includes('bug') && act === 'synchronize') {
+                const patch = version.split('.')[2];
+                version = `${version.split('.')[0]}.${version.split('.')[1]}.${parseInt(patch) + 1}`;
+              }
+
+              const tag = 'v' + version;
+
+              octokit.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'refs/tags/' + tag,
+                sha: pullRequest.data.head.sha
+              });
+
+              console.log(`Tag ${tag} created.`); 
             }
-
-            if (labels.includes('Major')) {
-              const major = version.split('.')[0];
-              version = `${parseInt(major) + 1}.0.0`;
-            } else 
-            if (labels.includes('enhancement')) {
-              const minor = version.split('.')[1];
-              version = `${version.split('.')[0]}.${parseInt(minor) + 1}.0`;
-            } else 
-            if (labels.includes('bug')) {
-              const patch = version.split('.')[2];
-              version = `${version.split('.')[0]}.${version.split('.')[1]}.${parseInt(patch) + 1}`;
-            }
-
-            const tag = 'v' + version;
-
-            octokit.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/' + tag,
-              sha: pullRequest.data.head.sha
-            });
-
-            console.log(`Tag ${tag} created.`);
