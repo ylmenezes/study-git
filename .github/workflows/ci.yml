@@ -46,16 +46,15 @@ jobs:
               version = latestTagResponse.data[0].name.substr(1);
             }
 
-            console.log(version);
-
-
             if (labels.includes('Major')) {
               const major = version.split('.')[0];
               version = `${parseInt(major) + 1}.0.0`;
-            } else if (labels.includes('enhancement')) {
+            } else 
+            if (labels.includes('enhancement')) {
               const minor = version.split('.')[1];
               version = `${version.split('.')[0]}.${parseInt(minor) + 1}.0`;
-            } else if (labels.includes('bug')) {
+            } else 
+            if (labels.includes('bug')) {
               const patch = version.split('.')[2];
               version = `${version.split('.')[0]}.${version.split('.')[1]}.${parseInt(patch) + 1}`;
             }
