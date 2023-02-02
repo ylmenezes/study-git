@@ -34,8 +34,7 @@ jobs:
               pull_number: context.issue.number
             });
 
-            console.log(process.env.GITHUB_EVENT_NAME);
-            console.log(process.env);
+            console.log(context);
 
             const labels = pullRequest.data.labels.map(label => label.name);
 
