@@ -23,7 +23,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           script: |
-            const Octokit = require('@octokit/rest');
+            const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({
               auth: 'token ${{ env.GITHUB_TOKEN }}'
             });
