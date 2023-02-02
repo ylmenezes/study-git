@@ -42,8 +42,12 @@ jobs:
             });
 
             let version = '0.0.0';
-            if (latestTagResponse.data.length > 0) {
-              version = latestTagResponse.data[0].name.substr(1);
+            const pullRequestCommit = pullRequest.data.head.sha;
+            for (const tag of latestTagResponse.data) {
+              if (tag.commit.sha === pullRequestCommit) {
+                version = tag.name.substr(1);
+                break;
+              }
             }
 
             const tag = 'v' + version;
