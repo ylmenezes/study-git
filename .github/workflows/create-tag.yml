@@ -34,7 +34,7 @@ jobs:
               pull_number: context.issue.number
             });
 
-            console.log(pullRequest.data);
+            console.log(pullRequest.data.state);
 
             const labels = pullRequest.data.labels.map(label => label.name);
 
