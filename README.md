@@ -1,2 +1,2 @@
-# study-advenced-git
-Repository to study Advenced Git
+# Studing Gti and Git Action
+Repository to study Advenced Git.

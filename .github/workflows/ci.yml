@@ -2,7 +2,8 @@ name: Create Tag
 
 on:
   pull_request:
-    types: [opened]
+    types: [closed]
+    branches: [master]
 
 jobs:
   create-tag:
@@ -14,7 +15,7 @@ jobs:
 
     - name: Get Pull Request Information
       id: pr-info
-      uses: actions/github-script@0.9.1
+      uses: actions/github-script@3.1.0
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
       with:
