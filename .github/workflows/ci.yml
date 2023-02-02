@@ -36,7 +36,18 @@ jobs:
 
             const labels = pullRequest.data.labels.map(label => label.name);
 
+            const latestTagResponse = await octokit.repos.listTags({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+
             let version = '0.0.0';
+            if (latestTagResponse.data.length > 0) {
+              version = latestTagResponse.data[0].name.substr(1);
+            }
+
+            console.log(version);
+
 
             if (labels.includes('Major')) {
               const major = version.split('.')[0];
