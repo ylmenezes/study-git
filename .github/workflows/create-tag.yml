@@ -2,7 +2,7 @@ name: Create Tag
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, closed]
     branches: [master]
 
 jobs:
@@ -34,7 +34,10 @@ jobs:
               pull_number: context.issue.number
             });
 
+            console.log(pullRequest.data);
+
             const labels = pullRequest.data.labels.map(label => label.name);
+
 
             const latestTagResponse = await octokit.repos.listTags({
               owner: context.repo.owner,
@@ -46,7 +49,7 @@ jobs:
               version = latestTagResponse.data[0].name.substr(1);
             }
 
-            if (labels.includes('Major')) {
+            if (labels.includes('major')) {
               const major = version.split('.')[0];
               version = `${parseInt(major) + 1}.0.0`;
             } else 
