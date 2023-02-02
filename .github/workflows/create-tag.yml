@@ -45,7 +45,7 @@ jobs:
 
             let version = '0.0.0';
 
-            if( act == 'closed') {
+            if( act === 'closed') {
 
               const pullRequestCommit = pullRequest.data.head.sha;
               for (const tag of latestTagResponse.data) {
@@ -67,19 +67,20 @@ jobs:
               });
 
             }else{
+            
               if (latestTagResponse.data.length > 0) {
                 version = latestTagResponse.data[0].name.substr(1);
               }
 
-              if (labels.includes('major')  && act == 'opened') {
+              if (labels.includes('major')  && act === 'opened') {
                 const major = version.split('.')[0];
                 version = `${parseInt(major) + 1}.0.0`;
               } else 
-              if (labels.includes('enhancement') && act == 'opened') {
+              if (labels.includes('enhancement') && act === 'opened') {
                 const minor = version.split('.')[1];
                 version = `${version.split('.')[0]}.${parseInt(minor) + 1}.0`;
               } else 
-              if (labels.includes('bug') && act == 'synchronize') {
+              if (labels.includes('bug') && act === 'synchronize') {
                 const patch = version.split('.')[2];
                 version = `${version.split('.')[0]}.${version.split('.')[1]}.${parseInt(patch) + 1}`;
               }
