@@ -53,6 +53,6 @@ jobs:
               repo: context.repo.repo,
               tag_name: tag,
               target_commitish: pullRequest.data.head.sha,
-              name: 'Releae ' + tag,
+              name: 'Release ' + tag,
               body: 'This is the release for version ' + tag
             });
