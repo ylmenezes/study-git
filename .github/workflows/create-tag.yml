@@ -24,7 +24,7 @@ jobs:
         with:
           script: |
             const act = context.payload.action;
-            console.log(context.payload);
+            console.log(context.payload.action);
             console.log(act);
             console.log(typeof act);
             const { Octokit } = require('@octokit/rest');
