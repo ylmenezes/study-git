@@ -24,9 +24,7 @@ jobs:
         with:
           script: |
             const act = context.payload.action;
-            console.log(context.payload.action);
-            console.log(act);
-            console.log(typeof act);
+
             const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({
               auth: 'token ${{ env.GITHUB_TOKEN }}'
@@ -69,6 +67,7 @@ jobs:
                 body: 'This is the release for version ' + tag
               });
 
+              console.log(`Release ${tag} created.`);
             }else{
 
               if (latestTagResponse.data.length > 0) {
@@ -97,7 +96,5 @@ jobs:
                 sha: pullRequest.data.head.sha
               });
 
-              
+              console.log(`Tag ${tag} created.`); 
             }
-
-            console.log(`Tag ${tag} created.`);
