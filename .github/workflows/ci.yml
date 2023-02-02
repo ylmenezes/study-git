@@ -42,7 +42,10 @@ jobs:
             });
 
             let version = '0.0.0';
-         
+            if (latestTagResponse.data.length > 0) {
+              version = latestTagResponse.data[0].name.substr(1);
+            }
+
             if (labels.includes('Major')) {
               const major = version.split('.')[0];
               version = `${parseInt(major) + 1}.0.0`;
